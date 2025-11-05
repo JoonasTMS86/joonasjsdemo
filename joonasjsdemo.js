@@ -1,6 +1,8 @@
 const screenWidth = 1910;
 const screenHeight = 909;
 const rowStride = screenWidth * 4;
+const bottomHalfOfScreen = Math.floor(screenHeight / 2) + (screenHeight % 2);
+const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
 
 var canvas = document.getElementById("myCanvas");
 var ctx = canvas.getContext("2d");
@@ -70,4 +72,39 @@ function play(delta)
 {
     if(imgData != null) ctx.putImageData(imgData, 0, 0);
 	imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+	var r, g, b, step;
+	step = 128;
+	for(var pos = 0; pos < (heightofBottomHalfOfScreen * rowStride); pos += 4) {
+		r = imgData.data[pos + 0];
+		g = imgData.data[pos + 1];
+		b = imgData.data[pos + 2];
+		if(r > 0) {
+			r -= step;
+			if(r < 0) r = 0;
+		}
+		if(r < 0) {
+			r += step;
+			if(r > 0) r = 0;
+		}
+		if(g > 0) {
+			g -= step;
+			if(g < 0) g = 0;
+		}
+		if(g < 0) {
+			g += step;
+			if(g > 0) g = 0;
+		}
+		if(b > 255) {
+			b -= step;
+			if(b < 255) b = 255;
+		}
+		if(b < 255) {
+			b += step;
+			if(b > 255) b = 255;
+		}
+		imgData.data[pos + (bottomHalfOfScreen * rowStride) + 0] = r;
+		imgData.data[pos + (bottomHalfOfScreen * rowStride) + 1] = g;
+		imgData.data[pos + (bottomHalfOfScreen * rowStride) + 2] = b;
+	}
 }
