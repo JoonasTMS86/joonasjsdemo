@@ -1,12 +1,10 @@
-const screenWidth = 1910;
-const screenHeight = 909;
-const rowStride = screenWidth * 4;
-const bottomHalfOfScreen = Math.floor(screenHeight / 2) + (screenHeight % 2);
+const screenWidth                = 1910;
+const screenHeight               = 909;
+const rowStride                  = screenWidth * 4;
+const bottomHalfOfScreen         = Math.floor(screenHeight / 2) + (screenHeight % 2);
 const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
-
-var canvas = document.getElementById("myCanvas");
-var ctx = canvas.getContext("2d");
-
+var canvas                       = document.getElementById("myCanvas");
+var ctx                          = canvas.getContext("2d");
 var imgData;
 
 let Application = PIXI.Application,
@@ -31,7 +29,6 @@ loader
 function setup() 
 {
 	state = play;
-	//Start the game loop
 	app.ticker.add(delta => gameLoop(delta));
 }
 
@@ -42,10 +39,12 @@ function updateStatus()
 
 function gameLoop(delta)
 {
-	//Update the current game state
 	state(delta);
 }
 
+/*
+	Make those pixels of the sprite that are of the given key RGB color, transparent.
+*/
 async function doSpriteTransparency(givenbufferctx, givenbuffer, givenpic, keyR, keyG, keyB)
 {
 	const sizeofit = 4 * givenbuffer.width * givenbuffer.height;
