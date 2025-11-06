@@ -287,19 +287,6 @@ function gameLoop(delta)
 	state(delta);
 }
 
-/*
-	Make those pixels of the sprite that are of the given key RGB color, transparent.
-*/
-async function doSpriteTransparency(givenbufferctx, givenbuffer, givenpic, keyR, keyG, keyB)
-{
-	const sizeofit = 4 * givenbuffer.width * givenbuffer.height;
-	for(var tpPos = 0; tpPos < sizeofit; tpPos += 4)
-	{
-		if(givenpic.data[tpPos] == keyR && givenpic.data[tpPos+1] == keyG && givenpic.data[tpPos+2] == keyB) givenpic.data[tpPos+3] = 0;
-	}
-	givenbufferctx.putImageData(givenpic, 0, 0);
-}
-
 window.onload = function() {
 	imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for(var y = 0; y < screenHeight; y++) {
