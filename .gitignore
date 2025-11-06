@@ -2,4 +2,5 @@
 *.cpp
 *.exe
 *.txt
+*.xcf
 sinewave

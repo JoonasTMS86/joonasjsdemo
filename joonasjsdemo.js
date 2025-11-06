@@ -1,10 +1,23 @@
+// Each character is 227 x 227 and characters 32 - 127 (96 characters) are normally used in text.
 const screenWidth                = 1910;
 const screenHeight               = 909;
 const rowStride                  = screenWidth * 4;
 const bottomHalfOfScreen         = Math.floor(screenHeight / 2) + (screenHeight % 2);
 const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
 const scrollSpeed                = 2;
+const characterWidth             = 227;
+const scrollText                 = "HELLO    ";
+var imgData;
+var scrollTextPos                = 0;
+var halfStep                     = 0;
 var gfxSlices                    = [];
+var gfxScrolledWidth             = 0; // How much of the current graphics block we have scrolled into view.
+var canvas                       = document.getElementById("myCanvas");
+var ctx                          = canvas.getContext("2d");
+var fontBuffer                   = document.getElementById("fontBuffer");
+var fontCtx                      = fontBuffer.getContext("2d");
+var fontSdata                    = fontCtx.createImageData(21792, 227);
+var fontSprite                   = document.getElementById("font");
 var gfxSliceYOffsets             = [
 1, 0, 0, 0, 0, 0, 0, 0, 
 1, 1, 2, 3, 4, 5, 7, 8, 
@@ -246,10 +259,6 @@ var gfxSliceYOffsets             = [
 29, 28, 27, 26, 24, 23, 22, 21, 
 21, 17, 14, 12, 11, 11
 ];
-var testGfxScrolledWidth         = 0; // How much of the test graphics block we have scrolled into view.
-var canvas                       = document.getElementById("myCanvas");
-var ctx                          = canvas.getContext("2d");
-var imgData;
 
 let Application = PIXI.Application,
 	Container = PIXI.Container,
@@ -286,20 +295,8 @@ function gameLoop(delta)
 	state(delta);
 }
 
-/*
-	Make those pixels of the sprite that are of the given key RGB color, transparent.
-*/
-async function doSpriteTransparency(givenbufferctx, givenbuffer, givenpic, keyR, keyG, keyB)
-{
-	const sizeofit = 4 * givenbuffer.width * givenbuffer.height;
-	for(var tpPos = 0; tpPos < sizeofit; tpPos += 4)
-	{
-		if(givenpic.data[tpPos] == keyR && givenpic.data[tpPos+1] == keyG && givenpic.data[tpPos+2] == keyB) givenpic.data[tpPos+3] = 0;
-	}
-	givenbufferctx.putImageData(givenpic, 0, 0);
-}
-
 window.onload = function() {
+	fontCtx.drawImage(fontSprite, 0, 0);
 	imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     for(var y = 0; y < screenHeight; y++) {
         for(var x = 0; x < screenWidth; x++) {
@@ -331,13 +328,29 @@ function play(delta)
 			gfxSlices[(y * 4) + (x * 908) + 3] = gfxSlices[(y * 4) + ((x + scrollSpeed) * 908) + 3];
 		}
 	}
+	var currX = gfxScrolledWidth;
+	var charXOffset = (scrollText.charCodeAt(scrollTextPos) - 32) * 227;
+	var characterSdata = fontCtx.getImageData(charXOffset, 0, 227, 227); // Get the current alphanumeric character.
 	for(var x = screenWidth - scrollSpeed; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
-			if(testGfxScrolledWidth < 50) {
-				gfxSlices[(y * 4) + (x * 908) + 0] = 255;
-				gfxSlices[(y * 4) + (x * 908) + 1] = 0;
-				gfxSlices[(y * 4) + (x * 908) + 2] = 0;
-				gfxSlices[(y * 4) + (x * 908) + 3] = 1;
+			if(currX < characterWidth) {
+				// Take the pixels from the font for the current character.
+				// Character indices 0 to 95 correspond to ASCII characters 32 to 127.
+				// 'A' = ASCII code 65
+				// Char index code 65 - 32 = 33, meaning:
+				// X offset 33 * 227 = 7491 in the font image file.
+				if(characterSdata.data[(y * 908) + (currX * 4) + 0] == 0) {
+					gfxSlices[(y * 4) + (x * 908) + 0] = 0;
+					gfxSlices[(y * 4) + (x * 908) + 1] = 0;
+					gfxSlices[(y * 4) + (x * 908) + 2] = 0;
+					gfxSlices[(y * 4) + (x * 908) + 3] = 0;
+				}
+				else {
+					gfxSlices[(y * 4) + (x * 908) + 0] = characterSdata.data[(y * 908) + (currX * 4) + 0];
+					gfxSlices[(y * 4) + (x * 908) + 1] = characterSdata.data[(y * 908) + (currX * 4) + 1];
+					gfxSlices[(y * 4) + (x * 908) + 2] = characterSdata.data[(y * 908) + (currX * 4) + 2];
+					gfxSlices[(y * 4) + (x * 908) + 3] = 1;
+				}
 			}
 			else {
 				gfxSlices[(y * 4) + (x * 908) + 0] = 0;
@@ -346,6 +359,7 @@ function play(delta)
 				gfxSlices[(y * 4) + (x * 908) + 3] = 0;
 			}
 		}
+		currX++;
 	}
 
 	var mem0 = gfxSliceYOffsets[0];
@@ -397,7 +411,7 @@ function play(delta)
 	}
 
 	var r, g, b, step;
-	step = 128;
+	step = 192;
 	for(var y = 0; y < heightofBottomHalfOfScreen; y++) {
 		for(var x = 0; x < screenWidth; x++) {
 			r = imgData.data[(y * rowStride) + (x * 4) + 0];
@@ -431,6 +445,20 @@ function play(delta)
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 1] = g;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 2] = b;
 		}
+		halfStep++;
+		if(halfStep >= 2) {
+			halfStep = 0;
+			if(step > 1) step--;
+		}
 	}
-	if(testGfxScrolledWidth < 50) testGfxScrolledWidth++;
+	if(gfxScrolledWidth < characterWidth) {
+		gfxScrolledWidth += scrollSpeed;
+	}
+	else {
+		gfxScrolledWidth -= characterWidth;
+		scrollTextPos++;
+		if(scrollTextPos >= scrollText.length) {
+			scrollTextPos = 0;
+		}
+	}
 }
