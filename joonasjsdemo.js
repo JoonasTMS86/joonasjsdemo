@@ -4,6 +4,7 @@ const rowStride                  = screenWidth * 4;
 const bottomHalfOfScreen         = Math.floor(screenHeight / 2) + (screenHeight % 2);
 const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
 const scrollSpeed                = 2;
+const characterWidth             = 227;
 var gfxSlices                    = [];
 var gfxSliceYOffsets             = [
 1, 0, 0, 0, 0, 0, 0, 0, 
@@ -333,7 +334,7 @@ function play(delta)
 	}
 	for(var x = screenWidth - scrollSpeed; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
-			if(testGfxScrolledWidth < 50) {
+			if(testGfxScrolledWidth < characterWidth) {
 				gfxSlices[(y * 4) + (x * 908) + 0] = 255;
 				gfxSlices[(y * 4) + (x * 908) + 1] = 0;
 				gfxSlices[(y * 4) + (x * 908) + 2] = 0;
@@ -432,5 +433,5 @@ function play(delta)
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 2] = b;
 		}
 	}
-	if(testGfxScrolledWidth < 50) testGfxScrolledWidth++;
+	if(testGfxScrolledWidth < characterWidth) testGfxScrolledWidth += scrollSpeed;
 }
