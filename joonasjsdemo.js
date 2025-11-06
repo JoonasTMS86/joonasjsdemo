@@ -1,3 +1,4 @@
+// Each character is 227 x 227 and characters 32 - 127 (96 characters) are normally used in text.
 const screenWidth                = 1910;
 const screenHeight               = 909;
 const rowStride                  = screenWidth * 4;
