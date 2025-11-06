@@ -319,9 +319,10 @@ function play(delta)
 			gfxSlices[(y * 4) + (x * 908) + 3] = gfxSlices[(y * 4) + ((x + scrollSpeed) * 908) + 3];
 		}
 	}
+	var currX = testGfxScrolledWidth;
 	for(var x = screenWidth - scrollSpeed; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
-			if(testGfxScrolledWidth < characterWidth) {
+			if(currX < characterWidth) {
 				gfxSlices[(y * 4) + (x * 908) + 0] = 255;
 				gfxSlices[(y * 4) + (x * 908) + 1] = 0;
 				gfxSlices[(y * 4) + (x * 908) + 2] = 0;
@@ -334,6 +335,7 @@ function play(delta)
 				gfxSlices[(y * 4) + (x * 908) + 3] = 0;
 			}
 		}
+		currX++;
 	}
 
 	var mem0 = gfxSliceYOffsets[0];
