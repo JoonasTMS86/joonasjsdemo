@@ -5,7 +5,11 @@ const bottomHalfOfScreen         = Math.floor(screenHeight / 2) + (screenHeight 
 const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
 const scrollSpeed                = 2;
 const characterWidth             = 227;
+var imgData;
 var gfxSlices                    = [];
+var gfxScrolledWidth             = 0; // How much of the current graphics block we have scrolled into view.
+var canvas                       = document.getElementById("myCanvas");
+var ctx                          = canvas.getContext("2d");
 var gfxSliceYOffsets             = [
 1, 0, 0, 0, 0, 0, 0, 0, 
 1, 1, 2, 3, 4, 5, 7, 8, 
@@ -247,10 +251,6 @@ var gfxSliceYOffsets             = [
 29, 28, 27, 26, 24, 23, 22, 21, 
 21, 17, 14, 12, 11, 11
 ];
-var testGfxScrolledWidth         = 0; // How much of the test graphics block we have scrolled into view.
-var canvas                       = document.getElementById("myCanvas");
-var ctx                          = canvas.getContext("2d");
-var imgData;
 
 let Application = PIXI.Application,
 	Container = PIXI.Container,
@@ -319,7 +319,7 @@ function play(delta)
 			gfxSlices[(y * 4) + (x * 908) + 3] = gfxSlices[(y * 4) + ((x + scrollSpeed) * 908) + 3];
 		}
 	}
-	var currX = testGfxScrolledWidth;
+	var currX = gfxScrolledWidth;
 	for(var x = screenWidth - scrollSpeed; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
 			if(currX < characterWidth) {
@@ -422,5 +422,10 @@ function play(delta)
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 2] = b;
 		}
 	}
-	if(testGfxScrolledWidth < characterWidth) testGfxScrolledWidth += scrollSpeed;
+	if(gfxScrolledWidth < characterWidth) {
+		gfxScrolledWidth += scrollSpeed;
+	}
+	else {
+		gfxScrolledWidth -= characterWidth;
+	}
 }
