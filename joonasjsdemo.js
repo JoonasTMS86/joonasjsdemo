@@ -4,9 +4,9 @@ const screenHeight               = 909;
 const rowStride                  = screenWidth * 4;
 const bottomHalfOfScreen         = Math.floor(screenHeight / 2) + (screenHeight % 2);
 const heightofBottomHalfOfScreen = screenHeight - bottomHalfOfScreen;
-const scrollSpeed                = 2;
+const scrollSpeed                = 5;
 const characterWidth             = 227;
-const scrollText                 = "HELLO    ";
+const scrollText                 = "Hi! I'm Joonas, the guy in the picture and the creator of this demo. Greetings to all software devs and other people of the IT industry. Greetings also to my family and friends all over the world. This scroll text will now loop. Bye.        ";
 var imgData;
 var scrollTextPos                = 0;
 var halfStep                     = 0;
@@ -367,32 +367,40 @@ function play(delta)
 	var mem3 = gfxSliceYOffsets[3];
 	var mem4 = gfxSliceYOffsets[4];
 	var mem5 = gfxSliceYOffsets[5];
+	var mem6 = gfxSliceYOffsets[6];
+	var mem7 = gfxSliceYOffsets[7];
 	for(var x = 0; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
 			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0];
 			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1];
 			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2];
 		}
-		if(x < (screenWidth - 6)) {
-			gfxSliceYOffsets[x] = gfxSliceYOffsets[x + 6];
+		if(x < (screenWidth - 8)) {
+			gfxSliceYOffsets[x] = gfxSliceYOffsets[x + 8];
 		}
-		if(x == (screenWidth - 6)) {
+		if(x == (screenWidth - 8)) {
 			gfxSliceYOffsets[x] = mem0;
 		}
-		if(x == (screenWidth - 5)) {
+		if(x == (screenWidth - 7)) {
 			gfxSliceYOffsets[x] = mem1;
 		}
-		if(x == (screenWidth - 4)) {
+		if(x == (screenWidth - 6)) {
 			gfxSliceYOffsets[x] = mem2;
 		}
-		if(x == (screenWidth - 3)) {
+		if(x == (screenWidth - 5)) {
 			gfxSliceYOffsets[x] = mem3;
 		}
-		if(x == (screenWidth - 2)) {
+		if(x == (screenWidth - 4)) {
 			gfxSliceYOffsets[x] = mem4;
 		}
-		if(x == (screenWidth - 1)) {
+		if(x == (screenWidth - 3)) {
 			gfxSliceYOffsets[x] = mem5;
+		}
+		if(x == (screenWidth - 2)) {
+			gfxSliceYOffsets[x] = mem6;
+		}
+		if(x == (screenWidth - 1)) {
+			gfxSliceYOffsets[x] = mem7;
 		}
 
 		for(var y = 0; y < 227; y++) {
