@@ -12,6 +12,10 @@ var scrollTextPos                = 0;
 var halfStep                     = 0;
 var gfxSlices                    = [];
 var gfxScrolledWidth             = 0; // How much of the current graphics block we have scrolled into view.
+var origImgBuffer                = document.getElementById("bgBuffer");
+var origImgCtx                   = origImgBuffer.getContext("2d");
+var origImgSdata                 = origImgCtx.createImageData(1910, 455);
+var origImgSprite                = document.getElementById("bggfx");
 var canvas                       = document.getElementById("myCanvas");
 var ctx                          = canvas.getContext("2d");
 var fontBuffer                   = document.getElementById("fontBuffer");
@@ -297,15 +301,9 @@ function gameLoop(delta)
 
 window.onload = function() {
 	fontCtx.drawImage(fontSprite, 0, 0);
+	ctx.drawImage(origImgSprite, 0, 0);
 	imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    for(var y = 0; y < screenHeight; y++) {
-        for(var x = 0; x < screenWidth; x++) {
-            imgData.data[(y * rowStride) + (x * 4) + 0] = 255;
-            imgData.data[(y * rowStride) + (x * 4) + 1] = 255;
-            imgData.data[(y * rowStride) + (x * 4) + 2] = 255;
-            imgData.data[(y * rowStride) + (x * 4) + 3] = 255;
-        }
-    }
+	origImgCtx.drawImage(origImgSprite, 0, 0);
 	// Height 227 * 4 RGB bytes * 1910 "slices" = 1,734,280 bytes
 	for(var pos = 0; pos < 1734280; pos += 4) {
 		gfxSlices[pos + 0] = 0;
@@ -319,6 +317,7 @@ function play(delta)
 {
     if(imgData != null) ctx.putImageData(imgData, 0, 0);
 	imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+	origImgSdata = origImgCtx.getImageData(0, 0, origImgBuffer.width, origImgBuffer.height);
 
 	for(var y = 0; y < 227; y++) {
 		for(var x = 0; x < (screenWidth - scrollSpeed); x++) {
@@ -370,9 +369,9 @@ function play(delta)
 	var mem5 = gfxSliceYOffsets[5];
 	for(var x = 0; x < screenWidth; x++) {
 		for(var y = 0; y < 227; y++) {
-			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = 255;
-			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1] = 255;
-			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2] = 255;
+			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0];
+			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1];
+			imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2];
 		}
 		if(x < (screenWidth - 6)) {
 			gfxSliceYOffsets[x] = gfxSliceYOffsets[x + 6];
@@ -398,9 +397,9 @@ function play(delta)
 
 		for(var y = 0; y < 227; y++) {
 			if(gfxSlices[(y * 4) + (x * 908) + 3] == 0) {
-				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = 255;
-				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1] = 255;
-				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2] = 255;
+				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0];
+				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 1];
+				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2] = origImgSdata.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 2];
 			}
 			else {
 				imgData.data[((gfxSliceYOffsets[x] + y) * rowStride) + (x * 4) + 0] = gfxSlices[(y * 4) + (x * 908) + 0];
@@ -444,6 +443,7 @@ function play(delta)
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 0] = r;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 1] = g;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 2] = b;
+			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 3] = 255;
 		}
 		halfStep++;
 		if(halfStep >= 2) {
