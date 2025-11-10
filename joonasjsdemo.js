@@ -9,7 +9,6 @@ const characterWidth             = 227;
 const scrollText                 = "Hi! I'm Joonas, the guy in the picture and the creator of this demo. Greetings to all software devs and other people of the IT industry. Greetings also to my family and friends all over the world. This scroll text will now loop. Bye.        ";
 var imgData;
 var scrollTextPos                = 0;
-var halfStep                     = 0;
 var gfxSlices                    = [];
 var gfxScrolledWidth             = 0; // How much of the current graphics block we have scrolled into view.
 var origImgBuffer                = document.getElementById("bgBuffer");
@@ -263,6 +262,8 @@ var gfxSliceYOffsets             = [
 29, 28, 27, 26, 24, 23, 22, 21, 
 21, 17, 14, 12, 11, 11
 ];
+var colorGradient = [];
+var pixelDelta = [];
 
 let Application = PIXI.Application,
 	Container = PIXI.Container,
@@ -310,6 +311,21 @@ window.onload = function() {
 		gfxSlices[pos + 1] = 0;
 		gfxSlices[pos + 2] = 0;
 		gfxSlices[pos + 3] = 0;
+	}
+	for(var pos = 0; pos < (heightofBottomHalfOfScreen * 3); pos += 3) {
+		colorGradient[pos + 0] = 0;
+		colorGradient[pos + 1] = 0;
+		colorGradient[pos + 2] = 255;
+	}
+	var step = 192;
+	var halfStep = 0;
+	for(var pos = 0; pos < heightofBottomHalfOfScreen; pos++) {
+		pixelDelta[pos] = step;
+		halfStep++;
+		if(halfStep >= 2) {
+			halfStep = 0;
+			if(step > 1) step--;
+		}
 	}
 };
 
@@ -417,47 +433,47 @@ function play(delta)
 		}
 	}
 
-	var r, g, b, step;
-	step = 192;
+	var r, g, b, pos1, pos2, pos3;
+	pos1 = 0;
+	pos2 = 1;
+	pos3 = 2;
 	for(var y = 0; y < heightofBottomHalfOfScreen; y++) {
 		for(var x = 0; x < screenWidth; x++) {
 			r = imgData.data[(y * rowStride) + (x * 4) + 0];
 			g = imgData.data[(y * rowStride) + (x * 4) + 1];
 			b = imgData.data[(y * rowStride) + (x * 4) + 2];
-			if(r > 0) {
-				r -= step;
-				if(r < 0) r = 0;
+			if(r > colorGradient[pos1]) {
+				r -= pixelDelta[y];
+				if(r < colorGradient[pos1]) r = colorGradient[pos1];
 			}
-			if(r < 0) {
-				r += step;
-				if(r > 0) r = 0;
+			if(r < colorGradient[pos1]) {
+				r += pixelDelta[y];
+				if(r > colorGradient[pos1]) r = colorGradient[pos1];
 			}
-			if(g > 0) {
-				g -= step;
-				if(g < 0) g = 0;
+			if(g > colorGradient[pos2]) {
+				g -= pixelDelta[y];
+				if(g < colorGradient[pos2]) g = colorGradient[pos2];
 			}
-			if(g < 0) {
-				g += step;
-				if(g > 0) g = 0;
+			if(g < colorGradient[pos2]) {
+				g += pixelDelta[y];
+				if(g > colorGradient[pos2]) g = colorGradient[pos2];
 			}
-			if(b > 255) {
-				b -= step;
-				if(b < 255) b = 255;
+			if(b > colorGradient[pos3]) {
+				b -= pixelDelta[y];
+				if(b < colorGradient[pos3]) b = colorGradient[pos3];
 			}
-			if(b < 255) {
-				b += step;
-				if(b > 255) b = 255;
+			if(b < colorGradient[pos3]) {
+				b += pixelDelta[y];
+				if(b > colorGradient[pos3]) b = colorGradient[pos3];
 			}
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 0] = r;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 1] = g;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 2] = b;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 3] = 255;
 		}
-		halfStep++;
-		if(halfStep >= 2) {
-			halfStep = 0;
-			if(step > 1) step--;
-		}
+		pos1 += 3;
+		pos2 += 3;
+		pos3 += 3;
 	}
 	if(gfxScrolledWidth < characterWidth) {
 		gfxScrolledWidth += scrollSpeed;
