@@ -263,6 +263,7 @@ var gfxSliceYOffsets             = [
 29, 28, 27, 26, 24, 23, 22, 21, 
 21, 17, 14, 12, 11, 11
 ];
+var colorGradient = [];
 
 let Application = PIXI.Application,
 	Container = PIXI.Container,
@@ -310,6 +311,11 @@ window.onload = function() {
 		gfxSlices[pos + 1] = 0;
 		gfxSlices[pos + 2] = 0;
 		gfxSlices[pos + 3] = 0;
+	}
+	for(var pos = 0; pos < 1362; pos += 3) {
+		colorGradient[pos + 0] = 0;
+		colorGradient[pos + 1] = 0;
+		colorGradient[pos + 2] = 255;
 	}
 };
 
@@ -417,36 +423,39 @@ function play(delta)
 		}
 	}
 
-	var r, g, b, step;
+	var r, g, b, step, pos1, pos2, pos3;
 	step = 192;
+	pos1 = 0;
+	pos2 = 1;
+	pos3 = 2;
 	for(var y = 0; y < heightofBottomHalfOfScreen; y++) {
 		for(var x = 0; x < screenWidth; x++) {
 			r = imgData.data[(y * rowStride) + (x * 4) + 0];
 			g = imgData.data[(y * rowStride) + (x * 4) + 1];
 			b = imgData.data[(y * rowStride) + (x * 4) + 2];
-			if(r > 0) {
+			if(r > colorGradient[pos1]) {
 				r -= step;
-				if(r < 0) r = 0;
+				if(r < colorGradient[pos1]) r = colorGradient[pos1];
 			}
-			if(r < 0) {
+			if(r < colorGradient[pos1]) {
 				r += step;
-				if(r > 0) r = 0;
+				if(r > colorGradient[pos1]) r = colorGradient[pos1];
 			}
-			if(g > 0) {
+			if(g > colorGradient[pos2]) {
 				g -= step;
-				if(g < 0) g = 0;
+				if(g < colorGradient[pos2]) g = colorGradient[pos2];
 			}
-			if(g < 0) {
+			if(g < colorGradient[pos2]) {
 				g += step;
-				if(g > 0) g = 0;
+				if(g > colorGradient[pos2]) g = colorGradient[pos2];
 			}
-			if(b > 255) {
+			if(b > colorGradient[pos3]) {
 				b -= step;
-				if(b < 255) b = 255;
+				if(b < colorGradient[pos3]) b = colorGradient[pos3];
 			}
-			if(b < 255) {
+			if(b < colorGradient[pos3]) {
 				b += step;
-				if(b > 255) b = 255;
+				if(b > colorGradient[pos3]) b = colorGradient[pos3];
 			}
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 0] = r;
 			imgData.data[((screenHeight - 1 - y) * rowStride) + (x * 4) + 1] = g;
@@ -458,6 +467,9 @@ function play(delta)
 			halfStep = 0;
 			if(step > 1) step--;
 		}
+		pos1 += 3;
+		pos2 += 3;
+		pos3 += 3;
 	}
 	if(gfxScrolledWidth < characterWidth) {
 		gfxScrolledWidth += scrollSpeed;
