@@ -319,6 +319,38 @@ function hex(value) {
 	return String.fromCharCode(digit1) + String.fromCharCode(digit2);
 }
 
+function hexToValue(character1, character2) {
+	var result;
+	var digit1 = character1.charCodeAt(0);
+	var digit2 = character2.charCodeAt(0);
+	if(digit1 >= 48 && digit1 <= 57) {
+		digit1 = character1.charCodeAt(0) - 48;
+	}
+	else if(digit1 >= 65 && digit1 <= 70) {
+		digit1 = character1.charCodeAt(0) - 55;
+	}
+	else if(digit1 >= 97 && digit1 <= 102) {
+		digit1 = character1.charCodeAt(0) - 87;
+	}
+	else {
+		return -1;
+	}
+	if(digit2 >= 48 && digit2 <= 57) {
+		digit2 = character2.charCodeAt(0) - 48;
+	}
+	else if(digit2 >= 65 && digit2 <= 70) {
+		digit2 = character2.charCodeAt(0) - 55;
+	}
+	else if(digit2 >= 97 && digit2 <= 102) {
+		digit2 = character2.charCodeAt(0) - 87;
+	}
+	else {
+		return -1;
+	}
+	result = (digit1 * 16) + digit2;
+	return result;
+}
+
 window.onload = function() {
 	fontCtx.drawImage(fontSprite, 0, 0);
 	ctx.drawImage(origImgSprite, 0, 0);
@@ -340,15 +372,89 @@ window.onload = function() {
 	}
 	var step = 192;
 	var halfStep = 0;
+	var colorDeltaString = "";
 	for(var pos = 0; pos < heightofBottomHalfOfScreen; pos++) {
 		pixelDelta[pos] = step;
+		if(step < 10) {
+			colorDeltaString = colorDeltaString + "00" + step;
+		}
+		else if(step < 100) {
+			colorDeltaString = colorDeltaString + "0" + step;
+		}
+		else {
+			colorDeltaString = colorDeltaString + step;
+		}
 		halfStep++;
 		if(halfStep >= 2) {
 			halfStep = 0;
 			if(step > 1) step--;
 		}
 	}
-	document.getElementById("gradientRGBValues").setAttribute("value", colorString);
+	var gradientColorField = document.getElementById("gradientRGBValues");
+	var deltaField = document.getElementById("gradientDeltas");
+	gradientColorField.setAttribute("value", colorString);
+	deltaField.setAttribute("value", colorDeltaString);
+	gradientColorField.addEventListener("keypress", function(event) {
+	if (event.key === "Enter") {
+		var colorString = gradientColorField.value;
+		var valid = true;
+		for(var pos = 0; pos < colorString.length; pos++) {
+			if(
+				(colorString.charCodeAt(pos) >= 48 && colorString.charCodeAt(pos) <= 57) ||
+				(colorString.charCodeAt(pos) >= 65 && colorString.charCodeAt(pos) <= 70) ||
+				(colorString.charCodeAt(pos) >= 97 && colorString.charCodeAt(pos) <= 102)
+			) {
+			}
+			else {
+				valid = false;
+				pos = colorString.length;
+			}
+		}
+		if(colorString.length != (heightofBottomHalfOfScreen * 3 * 2)) {
+			valid = false;
+		}
+		if(valid) {
+			var number;
+			for(var pos = 0; pos < (heightofBottomHalfOfScreen * 3); pos++) {
+				number = hexToValue(colorString[(pos * 2) + 0], colorString[(pos * 2) + 1]);
+				colorGradient[pos] = number;
+			}
+		}
+		else {
+			alert("Invalid color definition. Given text must contain " + heightofBottomHalfOfScreen + " RGB color values in hexadecimal notation, eg. ff33ba.");
+		}
+	}
+	});
+	deltaField.addEventListener("keypress", function(event) {
+	if (event.key === "Enter") {
+		var deltaString = deltaField.value;
+		var valid = true;
+		for(var pos = 0; pos < deltaString.length; pos++) {
+			if(deltaString.charCodeAt(pos) >= 48 && deltaString.charCodeAt(pos) <= 57) {
+			}
+			else {
+				valid = false;
+				pos = deltaString.length;
+			}
+		}
+		if(deltaString.length != (heightofBottomHalfOfScreen * 3)) {
+			valid = false;
+		}
+		if(valid) {
+			var number;
+			for(var pos = 0; pos < heightofBottomHalfOfScreen; pos++) {
+				var digit1 = deltaString.charCodeAt((pos * 3) + 0) - 48;
+				var digit2 = deltaString.charCodeAt((pos * 3) + 1) - 48;
+				var digit3 = deltaString.charCodeAt((pos * 3) + 2) - 48;
+				var number = (digit1 * 100) + (digit2 * 10) + digit3;
+				pixelDelta[pos] = number;
+			}
+		}
+		else {
+			alert("Invalid delta values. Text must contain " + heightofBottomHalfOfScreen + " 3-digit decimal values between 000 to 255.");
+		}
+	}
+	});
 };
 
 function play(delta)
