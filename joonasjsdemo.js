@@ -300,6 +300,25 @@ function gameLoop(delta)
 	state(delta);
 }
 
+function hex(value) {
+	var digit1, digit2, upper4Bits, lower4Bits;
+	upper4Bits = (value & 240) >> 4;
+	lower4Bits = value & 15;
+	if(upper4Bits >= 10) {
+		digit1 = upper4Bits + 87;
+	}
+	else {
+		digit1 = upper4Bits + 48;
+	}
+	if(lower4Bits >= 10) {
+		digit2 = lower4Bits + 87;
+	}
+	else {
+		digit2 = lower4Bits + 48;
+	}
+	return String.fromCharCode(digit1) + String.fromCharCode(digit2);
+}
+
 window.onload = function() {
 	fontCtx.drawImage(fontSprite, 0, 0);
 	ctx.drawImage(origImgSprite, 0, 0);
@@ -312,10 +331,12 @@ window.onload = function() {
 		gfxSlices[pos + 2] = 0;
 		gfxSlices[pos + 3] = 0;
 	}
+	var colorString = "";
 	for(var pos = 0; pos < (heightofBottomHalfOfScreen * 3); pos += 3) {
 		colorGradient[pos + 0] = 0;
 		colorGradient[pos + 1] = 0;
 		colorGradient[pos + 2] = 255;
+		colorString = colorString + hex(colorGradient[pos + 0]) + hex(colorGradient[pos + 1]) + hex(colorGradient[pos + 2]);
 	}
 	var step = 192;
 	var halfStep = 0;
@@ -327,6 +348,7 @@ window.onload = function() {
 			if(step > 1) step--;
 		}
 	}
+	document.getElementById("gradientRGBValues").setAttribute("value", colorString);
 };
 
 function play(delta)
